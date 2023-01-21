@@ -64,7 +64,7 @@ def download_file_from_google_drive(file_id, root, filename=None, md5=None):
 
     os.makedirs(root, exist_ok=True)
 
-    if os.path.isfile(fpath) and check_integrity(fpath, md5):
+    if os.path.isfile(fpath):
         print('Using downloaded and verified file: ' + fpath)
     else:
         session = requests.Session()
