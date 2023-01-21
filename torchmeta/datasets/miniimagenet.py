@@ -83,11 +83,11 @@ class MiniImagenet(CombinationMetaDataset):
     def __init__(self, root, num_classes_per_task=None, meta_train=False,
                  meta_val=False, meta_test=False, meta_split=None,
                  transform=None, target_transform=None, dataset_transform=None,
-                 class_augmentations=None, download=False):
+                 class_augmentations=None, download=False, integrity_check=False, gdrive_id='16V_ZlkW4SsnNDtnGmaBRq2OoPmUOc5mY'):
         dataset = MiniImagenetClassDataset(root, meta_train=meta_train,
             meta_val=meta_val, meta_test=meta_test, meta_split=meta_split,
             transform=transform, class_augmentations=class_augmentations,
-            download=download)
+            download=download, integrity_check=integrity_check, gdrive_id=gdrive_id)
         super(MiniImagenet, self).__init__(dataset, num_classes_per_task,
             target_transform=target_transform, dataset_transform=dataset_transform)
 
@@ -95,7 +95,7 @@ class MiniImagenet(CombinationMetaDataset):
 class MiniImagenetClassDataset(ClassDataset):
     folder = 'miniimagenet'
     # Google Drive ID from https://github.com/renmengye/few-shot-ssl-public
-    gdrive_id = '16V_ZlkW4SsnNDtnGmaBRq2OoPmUOc5mY'
+#     gdrive_id = '16V_ZlkW4SsnNDtnGmaBRq2OoPmUOc5mY'
     gz_filename = 'mini-imagenet.tar.gz'
     gz_md5 = 'b38f1eb4251fb9459ecc8e7febf9b2eb'
     pkl_filename = 'mini-imagenet-cache-{0}.pkl'
@@ -105,13 +105,14 @@ class MiniImagenetClassDataset(ClassDataset):
 
     def __init__(self, root, meta_train=False, meta_val=False, meta_test=False,
                  meta_split=None, transform=None, class_augmentations=None,
-                 download=False):
+                 download=False, integrity_check=False, gdrive_id='16V_ZlkW4SsnNDtnGmaBRq2OoPmUOc5mY'):
         super(MiniImagenetClassDataset, self).__init__(meta_train=meta_train,
             meta_val=meta_val, meta_test=meta_test, meta_split=meta_split,
             class_augmentations=class_augmentations)
-        
+        self.gdrive_id = gdrive_id
         self.root = os.path.join(os.path.expanduser(root), self.folder)
         self.transform = transform
+        self.integrity_check = integrity_check
 
         self.split_filename = os.path.join(self.root,
             self.filename.format(self.meta_split))
@@ -124,7 +125,7 @@ class MiniImagenetClassDataset(ClassDataset):
         if download:
             self.download()
 
-        if not self._check_integrity():
+        if not self._check_integrity() and integrity_check:
             raise RuntimeError('MiniImagenet integrity check failed')
         self._num_classes = len(self.labels)
 
